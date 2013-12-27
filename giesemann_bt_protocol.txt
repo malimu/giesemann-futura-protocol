@@ -1,0 +1,253 @@
+
+
+upper case
+space between words
+\n\r delimiter
+
+COMMAND (PARAMETER1) (PARAMETER 2)...\n\r
+
+ANSWER: 
+OK | FAIL (DATA|REASON)\n\r
+
+--------------------------------------------
+-- DEVICE INFORMATION
+--------------------------------------------
+// get list of boards/devices
+DEVICES
+OK 0 1 (2) (3)...
+
+----------------------
+// get name of device (device 0 name interpreted as lamp name)
+GET NAME 0
+OK (name)
+
+// set the name of device (device 0 name interpreted as lamp name)
+SET NAME 0 blablabla
+
+
+----------------------
+// get the time
+GETRTC
+OK 21:41:21:1:23:10:13
+(ss:mm:hh:?:dd:MM:YY)
+
+// set the time
+SETRTC 18:16:0:0:24:10:13
+param 1: ss:mm:hh:?:DD:MM:YY
+
+
+----------------------
+// get firmware version
+GET VERSION 0
+param 1: device
+OK OK 0.8-13-g747136f (Mon Dec 17 20:46:29 CET 2012) 1
+
+
+----------------------
+// get device serial number
+GET SERIAL 0
+param 1: device
+OK 0x0002101304210000
+
+
+----------------------
+// get board temperature
+GETTEMP 0
+param 1: device/board
+OK 52    -> degrees/celsius
+
+--------------------------------------------
+-- DEVICE MODE
+--------------------------------------------
+
+----------------------
+// get device mode
+MODE
+OK AUTO | MANUAL | DEMO | PREVIEW
+
+// start automatic mode (normal operation)
+AUTO
+OK
+
+// start demo mode (demonstrate lamp features)
+DEMO
+OK
+
+// go into manual mode (for direct manual control, see below)
+MANUAL
+
+// start preview mode (start day NOW and play day fast)
+PREVIEW
+
+
+--------------------------------------------
+-- DAYCYCLE
+--------------------------------------------
+SET CH0OCT0 0 0,0;341,0;378,1;404,3;420,8;430,13;446,19;461,31
+SET CH_channel_OCT_offset_ _board-id_ _time_,_intensity_;_time_,_intensity_;.....
+
+_channel_ = color channel (0 = white-red, 1 = white-green, 2 = royalblue, 3 = marineblue, 4 = white-purple)
+_offset_ = after every 8 points a new message needs to be created. increase offset for every message. 
+_board-id = device id
+_list of points_ = max 24 per channel (3 seperate messages). ;-seperated list of points:
+					_time_ = 0-1439 (minutes of day)
+					_intensity_ = 0-255
+				
+'save message', send after all points have been set using SET CH*OCT*
+SET CH0PCNT 0 23
+SET CH_channel_PCNT _device_ _numberOfPoints_
+
+_numberOfPoints_ = number of points in curve. 24 max.
+
+--------------------------------------------
+-- CLOUDS
+--------------------------------------------
+
+----------------------
+// make a cloud now
+CLOUD 100 60 
+param 1: intensity in %. 0-100
+param 2: length in seconds. 0-60
+
+
+----------------------
+// get cloud duration
+GET CLOUDDURATION 0
+param 1: device?
+OK 60
+
+// set cloud duration for automated clouds
+SET CLOUDDURATION 0 60
+param 1: device? 
+param 2: seconds 0-60
+
+
+----------------------
+// get amount of clouds per day
+GET CLOUDSPERDAY 0
+param 1: device?
+OK 29
+
+// set amount of clouds per day
+SET CLOUDSPERDAY 0 9
+param 1: device?
+param 2: number of clouds. 0-100. 0 means no clouds
+
+
+----------------------
+// get the amount of cloud dimming
+GET CLOUDDIMMING 0
+param 1: device?
+OK 20
+
+// set amount of cloud dimming (how dark it should get during a cloud)
+SET CLOUDDIMMING 0 20
+param 1: device?
+param 2: dim value in percent. 0-100
+
+
+--------------------------------------------
+-- LIGHTNING / THUNDERBOLTS
+--------------------------------------------
+
+----------------------
+// make a thunderbolt now with the current settings
+BOLTS
+
+----------------------
+// get amount of bolts per hour
+GET BOLTSPERHOUR 0
+param 1: device?
+OK 24
+
+// set amount of bolts per hour
+SET BOLTSPERHOUR 0 10
+param 1: device?
+param 2: bolt count. 0-100
+
+----------------------
+// get the time-window when bolts will happen
+GET BOLTSWND 0
+param 1: device?
+OK 1245,1439 		->(0 = 00:00, 1439 = 23:59)
+
+// set time-window when bolts will happen
+SET BOLTSWND 0 1345 1439
+param 1: device?
+param 2: start time as minutes of the day (0 = 00:00, 1439 = 23:59)
+param 3: stop time as minutes of the day
+
+
+--------------------------------------------
+-- MOON LIGHT
+--------------------------------------------
+
+----------------------
+// get moon state (on / off) per device/board
+GET MOONACTIVE 0
+param 1: device
+OK 1 			(0 | 1)
+
+// activate / deactive moon light
+SET MOONACTIVE 0 0
+param 1: device
+param 2: 0 | 1 (off | on)
+
+----------------------
+// get moon max intensity
+GET MOONMAX 0
+param 1: device? while setting other than 0 succeeds without error, it has no effect (lamp with 2 boards)
+OK 255 	-> 0-255
+
+// set moon max intensity
+SET MOONMAX 0 255
+param 1: device? (see above)
+param 2: max intensity. 0-255
+
+----------------------
+// get moon day (day of moon phase)
+GET MOONDAY 0
+param 1: device? other than 0 seems to be ignored...
+OK 14 	-> (1-28)
+
+// set moonday (day of moon phase)
+SET MOONDAY 0 14
+param 1: device? other than 0 seems to be ignored...
+param 2: day of moon phase (1-28)
+
+----------------------
+// get the moon time window
+GET MOONWND 0
+param 1: device? (other than 0 is ignored)
+OK 1376,1440		->(0 = 00:00, 1439 = 23:59)
+
+// set the moon time window
+SET MOONWND 0 1376,1440
+param 1: device? (other than 0 is ignored)
+param 2: startMinute,endMinute ->(0 = 00:00, 1439 = 23:59)
+
+
+--------------------------------------------
+-- MANUAL MODE
+--------------------------------------------
+(MUST BE IN MANUAL MODE!! SEE ABOVE, DEVICE MODES)
+
+----------------------
+VALUE * 255,255,255,255,255
+param 1: * = all boards, 0 = board 0, 1 = board 1.....
+param 2: white-red,white-green,royalblue,marineblue,white-purple (all 0-255)
+
+--------------------------------------------
+-- DEMO MODE
+--------------------------------------------
+// get demo state
+GET DEMO 0
+OK 0 | 1
+
+// make demo once
+DEMO
+OK
+
+// make endless demo / switch demo off
+SET DEMO 0 1 | 0 0			-> ?? was bedeuten 0 1 genau? scheinen nicht boards zu sein...
+OK
